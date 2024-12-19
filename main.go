@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -125,7 +126,6 @@ func abs(diff int) int {
 func consider(n int, report_local []string) {
   reportNew := append([]string{}, report_local[:n]...)
   reportNew = append(reportNew, report_local[n+1:]...)
-   // fmt.Println(reportNew)
 	if isOk(reportNew) {
 		anyOk = true
 	}
@@ -189,9 +189,40 @@ func dayTwo() {
 func dayTree(){
 
 	dat := openFile("text.txt")
-	Scanner := bufio.NewScanner(dat)
-	Scanner.Split(bufio.ScanWords)
+
+  defer dat.Close()
+
+  var content string
+	scanner := bufio.NewScanner(dat)
+  for scanner.Scan() {
+    content += scanner.Text()
+  }
+  
+  controlRegex := regexp.MustCompile(`do\(\)|don't\(\)|mul\((\d{1,3}),(\d{1,3})\)`)
+
+  totalSum := 0 
+
+  matches := controlRegex.FindAllStringSubmatch(content, -1)
+  consider := true 
+  fmt.Println(matches)
+  for _,v := range matches {
+    text := v[0]
+    fmt.Println("Consider?", consider)
+    if text == "do()"{
+      consider = true
+      continue
+     } else if text == "don't()" {
+      consider = false
+      continue
+    } else if (consider && v[1] != "" && v[2] != "") { 
+      numberA, _:= strconv.Atoi(v[1]) 
+      numberB, _ := strconv.Atoi(v[2]) 
+      totalSum +=  numberA * numberB ;
+    } 
+  }
+fmt.Println("Total", totalSum)
 }
 
 func main() {
+  dayTree()
 }
